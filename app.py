@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import filedialog, messagebox
+from tkinter import filedialog, messagebox, scrolledtext
 from PIL import Image, ImageTk
 
 # Konstanta untuk batas ukuran tampilan gambar
@@ -55,6 +55,10 @@ class ImageRGBViewerApp:
         self.label_rgb = tk.Label(self.root, text="RGB pada (Y, X): -")
         self.label_rgb.pack()
 
+        # Tombol untuk melihat semua nilai RGB
+        btn_view_all_rgb = tk.Button(self.root, text="Lihat Semua Nilai RGB", command=self.view_all_rgb)
+        btn_view_all_rgb.pack(pady=5)
+
     def open_image(self):
         """Fungsi untuk membuka dan menampilkan gambar yang dipilih pengguna."""
         file_path = filedialog.askopenfilename(filetypes=[("Image files", "*.jpg *.png *.jpeg *.bmp")])
@@ -100,6 +104,31 @@ class ImageRGBViewerApp:
     def is_valid_coordinate(self, x, y):
         """Memeriksa apakah koordinat yang dimasukkan pengguna berada dalam batas gambar."""
         return 0 <= x < self.img.height and 0 <= y < self.img.width
+
+    def view_all_rgb(self):
+        """Fungsi untuk menampilkan semua nilai RGB dalam bentuk matriks."""
+        if not self.img:
+            messagebox.showerror("Error", "Silakan unggah gambar terlebih dahulu.")
+            return
+
+        # Membuat jendela baru untuk menampilkan nilai RGB
+        rgb_window = tk.Toplevel(self.root)
+        rgb_window.title("Semua Nilai RGB")
+
+        # Textbox dengan scroll untuk menampilkan nilai RGB
+        scroll_text = scrolledtext.ScrolledText(rgb_window, wrap=tk.WORD, width=100, height=30)
+        scroll_text.pack(padx=10, pady=10)
+
+        # Mendapatkan nilai RGB untuk setiap pixel
+        pixels_rgb = ""
+        for y in range(self.img.height):
+            for x in range(self.img.width):
+                rgb = self.img.getpixel((x, y))
+                pixels_rgb += f"{rgb} "
+            pixels_rgb += "\n"  # Pindah ke baris baru setelah setiap baris gambar
+
+        # Menampilkan semua nilai RGB ke dalam textbox
+        scroll_text.insert(tk.END, pixels_rgb)
 
 # Jalankan aplikasi
 if __name__ == "__main__":

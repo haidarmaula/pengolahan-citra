@@ -119,15 +119,16 @@ class ImageRGBViewerApp:
         scroll_text = scrolledtext.ScrolledText(rgb_window, wrap=tk.WORD, width=100, height=30)
         scroll_text.pack(padx=10, pady=10)
 
-        # Mendapatkan nilai RGB untuk setiap pixel
-        pixels_rgb = ""
-        for y in range(self.img.height):
-            for x in range(self.img.width):
-                rgb = self.img.getpixel((x, y))
-                pixels_rgb += f"{rgb} "
-            pixels_rgb += "\n"  # Pindah ke baris baru setelah setiap baris gambar
+        # Gunakan load() untuk mengakses pixel secara lebih cepat
+        img_data = self.img.load()
 
-        # Menampilkan semua nilai RGB ke dalam textbox
+        # Gunakan list comprehension untuk menggabungkan data RGB lebih cepat
+        pixels_rgb = "\n".join(
+            " ".join(f"{img_data[x, y]}" for x in range(self.img.width))
+            for y in range(self.img.height)
+        )
+
+        # Masukkan semua data ke dalam scrolled text
         scroll_text.insert(tk.END, pixels_rgb)
 
 # Jalankan aplikasi

@@ -3,8 +3,8 @@ from tkinter import filedialog, messagebox
 from PIL import Image, ImageTk
 
 # Konstanta untuk batas ukuran tampilan gambar
-MAX_WIDTH = 500
-MAX_HEIGHT = 500
+MAX_WIDTH = 1000
+MAX_HEIGHT = 1000
 
 class ImageRGBViewerApp:
     def __init__(self, root):

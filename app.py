@@ -1,10 +1,11 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox, scrolledtext
 from PIL import Image, ImageTk
+import colorsys  # Digunakan untuk konversi RGB ke HSL
 
 # Konstanta untuk batas ukuran tampilan gambar
-MAX_WIDTH = 1000
-MAX_HEIGHT = 1000
+MAX_WIDTH = 500
+MAX_HEIGHT = 500
 
 class ImageRGBViewerApp:
     def __init__(self, root):
@@ -48,16 +49,22 @@ class ImageRGBViewerApp:
         self.entry_col.grid(row=1, column=1)
 
         # Tombol untuk mendapatkan nilai RGB
-        btn_get_rgb = tk.Button(frame_input, text="Dapatkan RGB", command=self.get_rgb_at_coordinates)
+        btn_get_rgb = tk.Button(frame_input, text="Dapatkan RGB dan HSL", command=self.get_rgb_hsl_at_coordinates)
         btn_get_rgb.grid(row=2, column=0, columnspan=2, pady=5)
 
-        # Label untuk menampilkan nilai RGB
+        # Label untuk menampilkan nilai RGB dan HSL
         self.label_rgb = tk.Label(self.root, text="RGB pada (Y, X): -")
         self.label_rgb.pack()
+        self.label_hsl = tk.Label(self.root, text="HSL pada (Y, X): -")
+        self.label_hsl.pack()
 
         # Tombol untuk melihat semua nilai RGB
         btn_view_all_rgb = tk.Button(self.root, text="Lihat Semua Nilai RGB", command=self.view_all_rgb)
         btn_view_all_rgb.pack(pady=5)
+
+        # Tombol untuk melihat semua nilai HSL
+        btn_view_all_hsl = tk.Button(self.root, text="Lihat Semua Nilai HSL", command=self.view_all_hsl)
+        btn_view_all_hsl.pack(pady=5)
 
     def open_image(self):
         """Fungsi untuk membuka dan menampilkan gambar yang dipilih pengguna."""
@@ -82,8 +89,8 @@ class ImageRGBViewerApp:
         new_size = (int(img_width * scale), int(img_height * scale))
         return image.resize(new_size, Image.Resampling.LANCZOS)
 
-    def get_rgb_at_coordinates(self):
-        """Mendapatkan nilai RGB pada koordinat (baris, kolom) yang dimasukkan pengguna."""
+    def get_rgb_hsl_at_coordinates(self):
+        """Mendapatkan nilai RGB dan HSL pada koordinat (baris, kolom) yang dimasukkan pengguna."""
         if not self.img:
             messagebox.showerror("Error", "Silakan unggah gambar terlebih dahulu.")
             return
@@ -95,6 +102,10 @@ class ImageRGBViewerApp:
             if self.is_valid_coordinate(x, y):
                 rgb = self.img.getpixel((y, x))
                 self.label_rgb.config(text=f"RGB pada ({x}, {y}): {rgb}")
+                
+                # Konversi RGB ke HSL
+                hsl = self.rgb_to_hsl(*rgb)
+                self.label_hsl.config(text=f"HSL pada ({x}, {y}): {hsl}")
             else:
                 messagebox.showerror("Error", "Koordinat di luar batas gambar.")
                 
@@ -130,6 +141,38 @@ class ImageRGBViewerApp:
 
         # Masukkan semua data ke dalam scrolled text
         scroll_text.insert(tk.END, pixels_rgb)
+
+    def view_all_hsl(self):
+        """Fungsi untuk menampilkan semua nilai HSL dalam bentuk matriks."""
+        if not self.img:
+            messagebox.showerror("Error", "Silakan unggah gambar terlebih dahulu.")
+            return
+
+        # Membuat jendela baru untuk menampilkan nilai HSL
+        hsl_window = tk.Toplevel(self.root)
+        hsl_window.title("Semua Nilai HSL")
+
+        # Textbox dengan scroll untuk menampilkan nilai HSL
+        scroll_text = scrolledtext.ScrolledText(hsl_window, wrap=tk.WORD, width=100, height=30)
+        scroll_text.pack(padx=10, pady=10)
+
+        # Gunakan load() untuk mengakses pixel secara lebih cepat
+        img_data = self.img.load()
+
+        # Gunakan list comprehension untuk menggabungkan data HSL lebih cepat
+        pixels_hsl = "\n".join(
+            " ".join(f"{self.rgb_to_hsl(*img_data[x, y])}" for x in range(self.img.width))
+            for y in range(self.img.height)
+        )
+
+        # Masukkan semua data ke dalam scrolled text
+        scroll_text.insert(tk.END, pixels_hsl)
+
+    def rgb_to_hsl(self, r, g, b):
+        """Konversi dari RGB ke HSL. Input dalam rentang 0-255, output HSL dalam rentang (0-360, 0-100, 0-100)."""
+        r, g, b = [x / 255.0 for x in (r, g, b)]  # Normalisasi RGB ke rentang 0-1
+        h, l, s = colorsys.rgb_to_hls(r, g, b)
+        return int(h * 360), int(s * 100), int(l * 100)
 
 # Jalankan aplikasi
 if __name__ == "__main__":

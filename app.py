@@ -9,7 +9,7 @@ MAX_HEIGHT = 500
 class ImageRGBViewerApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("Image RGB Viewer")
+        self.root.title("Pengolahan Citra")
         
         self.img = None
         self.photo = None
